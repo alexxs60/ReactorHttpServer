@@ -1,0 +1,121 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="980" viewBox="0 0 1280 980">
+  <defs>
+    <style>
+      .bg { fill: #f7f8fb; }
+      .box { fill: #ffffff; stroke: #2f5d7c; stroke-width: 2; rx: 10; }
+      .decision { fill: #fff8e6; stroke: #b7791f; stroke-width: 2; }
+      .io { fill: #eef8f3; stroke: #2f855a; stroke-width: 2; rx: 10; }
+      .end { fill: #fef2f2; stroke: #c53030; stroke-width: 2; rx: 10; }
+      .title { font: 700 30px Arial, "Microsoft YaHei", sans-serif; fill: #172033; }
+      .text { font: 18px Arial, "Microsoft YaHei", sans-serif; fill: #172033; }
+      .small { font: 15px Arial, "Microsoft YaHei", sans-serif; fill: #39465e; }
+      .arrow { stroke: #46566f; stroke-width: 2.2; fill: none; marker-end: url(#arrow); }
+      .label { font: 15px Arial, "Microsoft YaHei", sans-serif; fill: #5b677a; }
+      .lane { fill: #e9edf5; stroke: none; rx: 14; opacity: .65; }
+    </style>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#46566f"/>
+    </marker>
+  </defs>
+
+  <rect class="bg" x="0" y="0" width="1280" height="980"/>
+  <text class="title" x="44" y="58">ReactorHttp-CPP Reactor 流程图</text>
+  <text class="small" x="44" y="88">主线程负责 accept，工作线程 EventLoop 负责连接读写；普通文件可通过 sendfile 走零拷贝发送。</text>
+
+  <rect class="lane" x="36" y="120" width="360" height="800"/>
+  <rect class="lane" x="460" y="120" width="360" height="800"/>
+  <rect class="lane" x="884" y="120" width="360" height="800"/>
+  <text class="text" x="155" y="152">主 Reactor</text>
+  <text class="text" x="566" y="152">工作 Reactor</text>
+  <text class="text" x="1012" y="152">HTTP / 发送</text>
+
+  <rect class="box" x="94" y="190" width="240" height="58"/>
+  <text class="text" x="140" y="226">main() 启动服务器</text>
+
+  <rect class="box" x="94" y="290" width="240" height="68"/>
+  <text class="text" x="122" y="318">TcpServer::starting()</text>
+  <text class="small" x="132" y="342">启动线程池，注册 listen fd</text>
+
+  <rect class="io" x="94" y="400" width="240" height="68"/>
+  <text class="text" x="138" y="428">epoll_wait</text>
+  <text class="small" x="126" y="452">等待 listen fd 可读</text>
+
+  <polygon class="decision" points="214,515 334,585 214,655 94,585"/>
+  <text class="text" x="151" y="581">listen fd</text>
+  <text class="text" x="174" y="606">可读?</text>
+
+  <rect class="box" x="94" y="700" width="240" height="68"/>
+  <text class="text" x="144" y="728">accept4</text>
+  <text class="small" x="118" y="752">接收非阻塞 client fd</text>
+
+  <rect class="box" x="518" y="190" width="244" height="68"/>
+  <text class="text" x="548" y="218">ThreadPool 分发</text>
+  <text class="small" x="552" y="242">选择一个工作 EventLoop</text>
+
+  <rect class="box" x="518" y="305" width="244" height="68"/>
+  <text class="text" x="550" y="333">创建 TcpConnection</text>
+  <text class="small" x="548" y="357">注册 client fd 的 Channel</text>
+
+  <rect class="io" x="518" y="420" width="244" height="68"/>
+  <text class="text" x="564" y="448">工作 epoll_wait</text>
+  <text class="small" x="548" y="472">等待 READ / WRITE 事件</text>
+
+  <polygon class="decision" points="640,530 762,600 640,670 518,600"/>
+  <text class="text" x="579" y="596">client fd</text>
+  <text class="text" x="573" y="621">事件类型?</text>
+
+  <rect class="box" x="942" y="200" width="244" height="72"/>
+  <text class="text" x="986" y="228">processRead</text>
+  <text class="small" x="966" y="252">读取请求并解析 HTTP</text>
+
+  <rect class="box" x="942" y="315" width="244" height="72"/>
+  <text class="text" x="982" y="343">HttpResponse</text>
+  <text class="small" x="958" y="367">构造状态行和响应头</text>
+
+  <polygon class="decision" points="1064,430 1194,505 1064,580 934,505"/>
+  <text class="text" x="992" y="492">普通文件且</text>
+  <text class="text" x="984" y="516">开启零拷贝?</text>
+
+  <rect class="box" x="912" y="635" width="300" height="72"/>
+  <text class="text" x="956" y="663">记录 fileFd/offset/size</text>
+  <text class="small" x="982" y="687">准备 WRITE 事件发送</text>
+
+  <rect class="box" x="912" y="755" width="300" height="72"/>
+  <text class="text" x="966" y="783">写入 Buffer</text>
+  <text class="small" x="944" y="807">目录页/错误页/原始文件流程</text>
+
+  <rect class="box" x="518" y="735" width="244" height="68"/>
+  <text class="text" x="576" y="763">processWrite</text>
+  <text class="small" x="544" y="787">先发送响应头或 Buffer</text>
+
+  <rect class="io" x="518" y="850" width="244" height="58"/>
+  <text class="text" x="590" y="886">sendfile</text>
+
+  <rect class="end" x="940" y="860" width="244" height="58"/>
+  <text class="text" x="981" y="896">发送完成，关闭连接</text>
+
+  <path class="arrow" d="M214 248 L214 290"/>
+  <path class="arrow" d="M214 358 L214 400"/>
+  <path class="arrow" d="M214 468 L214 515"/>
+  <path class="arrow" d="M214 655 L214 700"/>
+  <path class="arrow" d="M334 734 C420 734 420 224 518 224"/>
+  <path class="arrow" d="M640 258 L640 305"/>
+  <path class="arrow" d="M640 373 L640 420"/>
+  <path class="arrow" d="M640 488 L640 530"/>
+  <path class="arrow" d="M762 585 C845 560 862 236 942 236"/>
+  <path class="arrow" d="M1064 272 L1064 315"/>
+  <path class="arrow" d="M1064 387 L1064 430"/>
+  <path class="arrow" d="M1064 580 L1064 635"/>
+  <path class="arrow" d="M934 505 C870 540 862 780 762 770"/>
+  <path class="arrow" d="M1064 707 L1064 755"/>
+  <path class="arrow" d="M912 790 C840 790 835 770 762 770"/>
+  <path class="arrow" d="M640 670 L640 735"/>
+  <path class="arrow" d="M640 803 L640 850"/>
+  <path class="arrow" d="M762 879 L940 889"/>
+
+  <text class="label" x="356" y="722">新连接</text>
+  <text class="label" x="796" y="568">READ</text>
+  <text class="label" x="648" y="710">WRITE</text>
+  <text class="label" x="1080" y="618">是</text>
+  <text class="label" x="880" y="528">否</text>
+</svg>

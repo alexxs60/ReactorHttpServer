@@ -1,0 +1,18 @@
+.vs/
+**/bin/
+**/obj/
+*.user
+*.log
+*.tlog
+*.lastbuildstate
+*.CompileUpToDateFile
+*.CopySourcesUpToDateFile
+*.LinkUpToDateFile
+
+# Local scratch files generated during resume/document work
+README_ReactorHttp-CPP.md
+resume_render/
+resume_*.txt
+resume_*.jpeg
+remove_resume_*.py
+make_resume_*.py
