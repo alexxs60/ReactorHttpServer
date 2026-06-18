@@ -19,18 +19,18 @@ WorkThread::~WorkThread()
 	}
 }
 
-void WorkThread::start()
+void WorkThread::start()  //这个函数属于主线程
 {
-	m_thread = new thread(&WorkThread::threadFunc, this);
+	m_thread = new thread(&WorkThread::threadFunc, this); //?
 	unique_lock<mutex> locker(m_mutex);
 	while (m_evLoop == nullptr)
 	{
-		m_cond.wait(locker);
+		m_cond.wait(locker);  //阻塞的是主线程还是子线程？主线程在等待子线程创建EventLoop实例后通知它继续执行
 		//do something
 	}
 }
 
-void WorkThread::threadFunc()
+void WorkThread::threadFunc()   //任务函数属于子线程
 {
 	m_mutex.lock();
 	m_evLoop = new EventLoop(m_name);

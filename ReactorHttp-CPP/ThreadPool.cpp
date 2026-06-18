@@ -28,7 +28,7 @@ void ThreadPool::running() {
 		for (int i = 0; i < m_threadNum; i++)
 		{
 			WorkThread* workThread = new WorkThread(i);
-			workThread->start();
+			workThread->start();  //当条件变量阻塞时，主线程会阻塞在这里
 			m_workThreads.push_back(workThread);
 		}
 	}
